@@ -9,7 +9,7 @@ A working prototype that turns an unstructured client message (email, web form o
 - a **draft first response** that a team member reviews, edits and sends
 - **warnings** when a person should look more carefully (data exposure, prompt injection, vague requests, invented prices, low confidence)
 
-> **Live app:** https://node-solutions-triage-assistant-mj8gdvbjtwqranwulri6hy.streamlit.app/ · **Video walkthrough:** `<add video link>`
+> **Live app:** https://node-solutions-triage-assistant-mj8gdvbjtwqranwulri6hy.streamlit.app/
 
 ![Triage flow](docs/architecture.svg)
 
@@ -188,7 +188,7 @@ data/cases.json         6 mock requests + 9 synthetic edge cases with expected l
 eval.py                 scoring script (markdown report)
 tests/                  unit tests with a fake LLM (no network)
 results/                saved eval reports
-docs/                   video script, submission checklist, study guide
+docs/architecture.svg   request-flow diagram
 ```
 
 ## Data and privacy
@@ -197,4 +197,4 @@ Only the six mock requests from the brief and invented edge cases are used. No r
 
 ## AI use
 
-I used an AI coding assistant while building this. I reviewed every file and can explain each design choice, prompt and line of logic. See [`docs/STUDY_GUIDE.md`](docs/STUDY_GUIDE.md).
+I used an AI coding assistant while building this. I reviewed every file and can explain each design choice, prompt and line of logic.
