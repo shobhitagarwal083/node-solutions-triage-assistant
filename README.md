@@ -9,7 +9,7 @@ A working prototype that turns an unstructured client message (email, web form o
 - a **draft first response** that a team member reviews, edits and sends
 - **warnings** when a person should look more carefully (data exposure, prompt injection, vague requests, invented prices, low confidence)
 
-> **Live app:** `<add Streamlit Cloud link>` · **Video walkthrough:** `<add video link>`
+> **Live app:** https://node-solutions-triage-assistant-mj8gdvbjtwqranwulri6hy.streamlit.app/ · **Video walkthrough:** `<add video link>`
 
 ![Triage flow](docs/architecture.svg)
 

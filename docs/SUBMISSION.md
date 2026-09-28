@@ -45,8 +45,8 @@ Follow `docs/VIDEO_SCRIPT.md`. Upload to YouTube as **Unlisted** or share a Loom
 > Thank you for the challenge. Please find my submission below:
 >
 > - **Video walkthrough (≈7 min):** [link]
-> - **Live app:** [Streamlit link] (works without login)
-> - **Repository:** [GitHub link], with setup steps, prompt design, decisions, limitations and next steps in the README
+> - **Live app:** https://node-solutions-triage-assistant-mj8gdvbjtwqranwulri6hy.streamlit.app/ (works without login)
+> - **Repository:** https://github.com/shobhitagarwal083/node-solutions-triage-assistant, with setup steps, prompt design, decisions, limitations and next steps in the README
 >
 > **In short:** a Streamlit app that sends each request through one LLM call with a written triage rubric. It validates the structured output, falls back to keyword rules if the AI is unavailable, and applies safety guardrails, so data-exposure and outage cases are never under-prioritised. Every request gets a summary, category, priority with reason, owner and an editable draft reply. An inbox view sorts everything by urgency. I tested it on the six mock requests plus nine edge cases (prompt injection, a non-English message, vague and multi-issue requests).
 >
