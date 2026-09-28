@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1040 300" width="1040" height="300" font-family="-apple-system, Segoe UI, Helvetica, Arial, sans-serif">
+  <rect width="1040" height="300" rx="14" fill="#ffffff"/>
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#555"/>
+    </marker>
+  </defs>
+  <style>
+    .box{fill:#F5F3FB;stroke:#4527A0;stroke-width:1.5}
+    .ai{fill:#EDE7F6;stroke:#4527A0;stroke-width:2}
+    .rule{fill:#FFF3E0;stroke:#E65100;stroke-width:1.5}
+    .human{fill:#E8F5E9;stroke:#2E7D32;stroke-width:1.5}
+    .t{font-size:14px;font-weight:600;fill:#1f1f1f;text-anchor:middle}
+    .s{font-size:11.5px;fill:#555;text-anchor:middle}
+    .l{stroke:#555;stroke-width:1.6;fill:none}
+    .d{stroke:#E65100;stroke-width:1.6;fill:none;stroke-dasharray:5 4}
+  </style>
+
+  <rect class="box" x="20" y="60" width="140" height="80" rx="10"/>
+  <text class="t" x="90" y="93">Client message</text>
+  <text class="s" x="90" y="113">email · web form · chat</text>
+
+  <rect class="ai" x="195" y="60" width="160" height="80" rx="10"/>
+  <text class="t" x="275" y="88">LLM + rubric</text>
+  <text class="s" x="275" y="107">rules, routing, reply rules</text>
+  <text class="s" x="275" y="124">→ strict JSON</text>
+
+  <rect class="box" x="390" y="60" width="150" height="80" rx="10"/>
+  <text class="t" x="465" y="88">Validate</text>
+  <text class="s" x="465" y="107">Pydantic enums</text>
+  <text class="s" x="465" y="124">1 repair attempt</text>
+
+  <rect class="rule" x="575" y="60" width="150" height="80" rx="10"/>
+  <text class="t" x="650" y="88">Guardrails</text>
+  <text class="s" x="650" y="107">data exposure · outage</text>
+  <text class="s" x="650" y="124">injection · invented $</text>
+
+  <rect class="box" x="760" y="60" width="120" height="80" rx="10"/>
+  <text class="t" x="820" y="88">Triage card</text>
+  <text class="s" x="820" y="107">labels + reasons</text>
+  <text class="s" x="820" y="124">draft reply</text>
+
+  <rect class="human" x="905" y="60" width="115" height="80" rx="10"/>
+  <text class="t" x="962" y="93">Human</text>
+  <text class="s" x="962" y="113">review · edit · send</text>
+
+  <line class="l" x1="160" y1="100" x2="193" y2="100" marker-end="url(#a)"/>
+  <line class="l" x1="355" y1="100" x2="388" y2="100" marker-end="url(#a)"/>
+  <line class="l" x1="540" y1="100" x2="573" y2="100" marker-end="url(#a)"/>
+  <line class="l" x1="725" y1="100" x2="758" y2="100" marker-end="url(#a)"/>
+  <line class="l" x1="880" y1="100" x2="903" y2="100" marker-end="url(#a)"/>
+
+  <rect class="rule" x="390" y="200" width="150" height="70" rx="10"/>
+  <text class="t" x="465" y="228">Keyword fallback</text>
+  <text class="s" x="465" y="248">used if AI is down / invalid</text>
+  <path class="d" d="M465,140 L465,198" marker-end="url(#a)"/>
+  <path class="d" d="M540,235 L650,235 L650,142" marker-end="url(#a)"/>
+  <text class="s" x="457" y="175" style="text-anchor:end">no key · rate limit · invalid twice</text>
+
+  <text x="20" y="34" style="font-size:16px;font-weight:700;fill:#1f1f1f">AI Request Triage Assistant: request flow</text>
+</svg>
