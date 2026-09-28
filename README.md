@@ -18,7 +18,8 @@ A working prototype that turns an unstructured client message (email, web form o
 ## Quick start
 
 ```bash
-git clone <repo-url> && cd triage-assistant
+git clone https://github.com/shobhitagarwal083/node-solutions-triage-assistant.git
+cd node-solutions-triage-assistant
 python3 -m venv .venv && source .venv/bin/activate
 pip install -r requirements-dev.txt
 cp .env.example .env        # add a free GEMINI_API_KEY from https://aistudio.google.com/apikey
