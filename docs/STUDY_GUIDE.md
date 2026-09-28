@@ -10,8 +10,11 @@ A request goes into one LLM call. The system prompt holds the business rules: ca
 **Why one LLM call and not an agent or several calls?**
 The task is classification plus a short reply. One call is fast (a few seconds), cheap and easy to debug. Several calls would add latency and more places to fail without improving the labels.
 
-**Why Gemini?**
-The brief says don't spend money, and Gemini has a free tier that needs no card. The LLM layer is plain HTTPS, so switching to Groq, OpenRouter, a local Ollama model or a paid model is an `.env` change (`triage/llm.py`).
+**Why Gemini, and why Flash-Lite?**
+The brief says don't spend money, and Gemini has a free tier that needs no card. While testing I found the free quota is **per model, per day**: only 20 requests/day on `gemini-3.8-flash` and `3.7-flash`, which a demo plus reviewers would exhaust. So the default is `gemini-3.1-flash-lite`: fast (~3 s), a bigger quota, and 15/15 on my eval. It is followed by a chain of backup models (`GEMINI_BACKUP_MODELS`), tried automatically on "busy" (503) or "quota" (429) errors. The LLM layer is plain HTTPS, so switching to Groq, OpenRouter, a local Ollama model or a paid model is an `.env` change (`triage/llm.py`).
+
+**The lite model's first drafts broke some rules (no greeting, "we are currently working on it"). What did you do?**
+I tightened the reply rules in the prompt: an explicit format, "describe actions only as escalated or planned", placeholders only for unknown details, and one example reply. The drafts then followed the format consistently. That's the normal loop: look at real outputs, find the failure, fix the rule, re-run the eval.
 
 **How do you stop the model from inventing labels like "Critical"?**
 The labels are Python enums (`triage/schema.py`). Pydantic rejects anything outside them. Small variations like `"urgent"` or `"sales team"` are normalised first, and anything else triggers the repair attempt.

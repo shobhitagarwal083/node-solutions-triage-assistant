@@ -106,6 +106,20 @@ def test_label_normalisation():
     assert [f.value for f in r.flags] == ["deadline"]
 
 
+def test_gemini_switches_to_backup_model_when_busy(monkeypatch):
+    from triage import llm
+
+    def fake_post(url, headers, body):
+        if "main-model" in url:
+            raise LLMError("AI model busy (503)", retryable=True)
+        return {"candidates": [{"content": {"parts": [{"text": llm_answer()}]}}]}
+
+    monkeypatch.setattr(llm, "_post", fake_post)
+    provider = llm.GeminiProvider("key", "main-model", ["backup-model"])
+    out = triage("The portal is down.", provider=provider)
+    assert out.engine == "gemini:backup-model"
+
+
 def test_empty_input_rejected():
     with pytest.raises(ValueError):
         triage("   ", provider=None)

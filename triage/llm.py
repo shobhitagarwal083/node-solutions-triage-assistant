@@ -18,7 +18,15 @@ TIMEOUT_S = 45
 
 
 class LLMError(Exception):
-    """Raised with a human-readable message when the provider call fails."""
+    """Raised with a human-readable message when the provider call fails.
+
+    retryable=True means the provider is busy or rate-limited (not a bad key or
+    bad request), so trying a backup model may succeed.
+    """
+
+    def __init__(self, message: str, retryable: bool = False):
+        super().__init__(message)
+        self.retryable = retryable
 
 
 @dataclass
@@ -43,13 +51,20 @@ def _post(url: str, headers: dict, body: dict) -> dict:
             if attempt == 0:
                 time.sleep(1.5)
                 continue
-            raise LLMError(f"Could not reach the AI provider ({exc.__class__.__name__}).") from exc
+            raise LLMError(
+                f"Could not reach the AI provider ({exc.__class__.__name__}).", retryable=True
+            ) from exc
 
-        if resp.status_code in (500, 502, 503, 504) and attempt == 0:
+        busy = resp.status_code in (500, 502, 503, 504)
+        if busy and attempt == 0:
             time.sleep(1.5)
             continue
+        if busy:
+            raise LLMError(f"AI model busy ({resp.status_code}), try again shortly.", retryable=True)
         if resp.status_code == 429:
-            raise LLMError("AI provider rate limit reached (free tier). Try again in a minute.")
+            raise LLMError(
+                "AI provider rate limit reached (free tier). Try again in a minute.", retryable=True
+            )
         if resp.status_code in (401, 403):
             raise LLMError("AI provider rejected the API key. Check your .env / secrets.")
         if resp.status_code == 404:
@@ -61,17 +76,32 @@ def _post(url: str, headers: dict, body: dict) -> dict:
                 detail = resp.text[:200]
             raise LLMError(f"AI provider error {resp.status_code}: {detail}")
         return resp.json()
-    raise LLMError("AI provider unavailable.")
+    raise LLMError("AI provider unavailable.", retryable=True)
 
 
 class GeminiProvider(Provider):
     URL = "https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent"
 
-    def __init__(self, api_key: str, model: str):
+    def __init__(self, api_key: str, model: str, backup_models: list[str] | None = None):
         super().__init__(name="gemini", model=model)
         self._key = api_key
+        self._models = [model, *(m for m in backup_models or [] if m != model)]
 
     def complete(self, system: str, messages: list[dict]) -> str:
+        """Try the main model, then backups if it is busy or rate-limited."""
+        error = None
+        for model in self._models:
+            try:
+                text = self._complete_with(model, system, messages)
+                self.model = model  # so the UI shows which model answered
+                return text
+            except LLMError as exc:
+                if not exc.retryable:
+                    raise
+                error = exc
+        raise error
+
+    def _complete_with(self, model: str, system: str, messages: list[dict]) -> str:
         contents = [
             {
                 "role": "model" if m["role"] == "assistant" else "user",
@@ -81,7 +111,7 @@ class GeminiProvider(Provider):
         ]
         # Generous limit: on thinking models, reasoning tokens count toward it too.
         config = {"responseMimeType": "application/json", "maxOutputTokens": 8192}
-        if self.model.startswith("gemini-3"):
+        if model.startswith("gemini-3"):
             # Gemini 3 docs advise keeping the default temperature; low thinking keeps it fast.
             config["thinkingConfig"] = {"thinkingLevel": "low"}
         else:
@@ -91,7 +121,7 @@ class GeminiProvider(Provider):
             "contents": contents,
             "generationConfig": config,
         }
-        url = self.URL.format(model=self.model)
+        url = self.URL.format(model=model)
         headers = {"x-goog-api-key": self._key, "Content-Type": "application/json"}
         try:
             data = _post(url, headers, body)
@@ -147,7 +177,15 @@ def get_provider() -> Provider | None:
     if choice == "rules":
         return None
     if choice in ("auto", "gemini") and gemini_key:
-        return GeminiProvider(gemini_key, os.getenv("GEMINI_MODEL", "gemini-3.8-flash"))
+        # Free-tier quotas are per model per day, so a chain of models multiplies capacity.
+        backups = os.getenv(
+            "GEMINI_BACKUP_MODELS", "gemini-3.5-flash-lite,gemini-3.8-flash,gemini-3.7-flash"
+        )
+        return GeminiProvider(
+            gemini_key,
+            os.getenv("GEMINI_MODEL", "gemini-3.1-flash-lite"),
+            [m.strip() for m in backups.split(",") if m.strip()],
+        )
     if choice in ("auto", "openai_compatible") and llm_base:
         return OpenAICompatibleProvider(
             os.getenv("LLM_API_KEY", ""),

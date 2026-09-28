@@ -5,8 +5,10 @@
 2. **Create API key**. No credit card is needed for the free tier.
 3. Copy `.env.example` to `.env` and paste the key after `GEMINI_API_KEY=`.
 4. Run `streamlit run app.py`. The sidebar should say **AI connected**.
-5. Run `python eval.py --pause 4 --out results/eval_ai.md` and put the score into the README and video.
-   The pause keeps you under free-tier rate limits.
+5. ✅ Done: `python eval.py --pause 4 --out results/eval_ai.md` scored 15/15.
+   **Quota warning:** free quotas are per model per day. Each eval run uses ~15 requests, so
+   don't re-run it casually on the day you record. The app automatically moves to backup models
+   and then to the rules fallback, clearly labelled, if quotas run out.
 
 ## 2. Push to GitHub (5 min)
 ```bash

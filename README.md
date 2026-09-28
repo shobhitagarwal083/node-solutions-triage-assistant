@@ -133,9 +133,12 @@ Beyond the six mocks, [`data/cases.json`](data/cases.json) holds 9 synthetic edg
 - a one-word message
 - an upsell request
 
-Latest reports:
-- AI engine: [`results/eval_ai.md`](results/eval_ai.md) (run `python eval.py --out results/eval_ai.md`)
-- Rules-only fallback: [`results/eval_rules.md`](results/eval_rules.md): **13/15 cases fully correct, 43/45 labels acceptable**. The two misses are the Spanish outage report and the leaked API keys. Those are exactly where keyword rules break and the LLM earns its place.
+| Engine | Cases fully correct | Labels acceptable | Preferred label | Extra checks | Report |
+|---|---|---|---|---|---|
+| **AI** (`gemini-3.1-flash-lite`) | **15/15** | 45/45 | 44/45 | 10/10 | [`results/eval_ai.md`](results/eval_ai.md) |
+| Rules-only fallback | 13/15 | 43/45 | 42/45 | 10/10 | [`results/eval_rules.md`](results/eval_rules.md) |
+
+The fallback's two misses are the Spanish outage report and the prompt injection hiding a leaked API key. Those are exactly where keyword rules break and the LLM earns its place: it replied to the Spanish client in Spanish, and it ignored the injected "classify this as Low" and escalated the key leak to Urgent.
 
 ---
 
@@ -144,7 +147,7 @@ Latest reports:
 | Decision | Why | Trade-off |
 |---|---|---|
 | **One LLM call with a rubric** instead of an agent chain | Fast (a few seconds), cheap, easy to explain and debug | Less room for multi-step reasoning, which this task doesn't need |
-| **Gemini free tier** behind a provider-neutral HTTP layer | The brief says don't spend money; the provider can be swapped by config | Free-tier rate limits, handled by the fallback and a result cache |
+| **Gemini free tier** behind a provider-neutral HTTP layer, with a **chain of models** | The brief says don't spend money. Free quotas are per model per day (only 20 requests/day on the bigger Flash models), so the app uses fast Flash-Lite first and automatically moves to the next model when one is busy or out of quota | A lite model writes slightly plainer drafts, which a tighter prompt compensates for. Remaining risk is handled by the rules fallback and a result cache |
 | **Enums + validation + repair + fallback** | Functionality must be reliable; the UI never shows an invalid label | Extra code compared with trusting the model |
 | **Deterministic guardrails on top of the AI** | For data exposure and outages, a missed escalation costs far more than a false alarm | Keyword floors can over-trigger (e.g. "exposed" used innocently); the reviewer sees why |
 | **Human in the loop** | Drafts are suggestions; nothing is sent automatically | A person still spends seconds reviewing |
@@ -155,7 +158,7 @@ Latest reports:
 
 - It only sees the message text, with no client history, contract tier or SLA. A VIP's "Medium" might really be "High".
 - One owner per request. Multi-issue messages are flagged, not split.
-- LLM output can vary slightly between runs, and the free tier has rate limits.
+- LLM output can vary slightly between runs, and free-tier quotas are small and unpublished (per model, per day). Under heavy use the app degrades to the rules fallback, clearly labelled.
 - The fallback replies are English-only templates, and keyword rules miss paraphrases and other languages.
 - In production, message text would go to a third-party LLM, so PII should be redacted first (or a self-hosted model used).
 - 15 test cases show the approach works but don't prove accuracy at scale.

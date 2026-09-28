@@ -17,7 +17,7 @@
 ## 0:30–1:15 · How it's built (30-second architecture)
 **Screen:** `docs/architecture.svg` (or the README diagram).
 
-> "It's deliberately simple. One LLM call, using Gemini's free tier because the brief says don't spend money. The model gets a written rubric (category definitions, what Urgent vs High means, a routing table) and must return strict JSON. I validate that JSON against fixed enums. If it's invalid, I send the error back once to repair it. If the AI is down or rate-limited, a keyword fallback takes over, so the workflow never dead-ends. And on top of every result there's a small guardrail layer for the cases where a mistake is expensive, like data exposure."
+> "It's deliberately simple. One LLM call, using Gemini's free tier because the brief says don't spend money. Free quotas are per model per day, so it starts with the fast Flash-Lite model and moves to backup models automatically. The model gets a written rubric (category definitions, what Urgent vs High means, a routing table) and must return strict JSON. I validate that JSON against fixed enums. If it's invalid, I send the error back once to repair it. If the AI is down or rate-limited, a keyword fallback takes over, so the workflow never dead-ends. And on top of every result there's a small guardrail layer for the cases where a mistake is expensive, like data exposure."
 
 ## 1:15–2:30 · Demo 1: Request 05 (the most important one)
 **Screen:** Triage tab → sample "Mock 05" → **Triage request**.
@@ -59,7 +59,7 @@ Point at, in order:
 ## 5:15–6:00 · Under the hood: prompt and evaluation
 **Screen:** `triage/prompts.py` (scroll the rubric), then terminal: `python eval.py`.
 
-> "The business rules live in the prompt as plain text, so changing a definition is a one-line edit. The model writes its reason before each label, which makes it more consistent. The few-shot examples are my own synthetic ones, not the six mocks, so I'm not teaching to the test. I built an eval set: the six mocks plus nine edge cases (vague, two issues in one, angry client, fake urgency, Spanish, prompt injection, spam). With the AI it scores [X/15]. The keyword fallback alone gets 13/15 and misses the Spanish and the API-key leak, which is exactly why the LLM is the primary engine. There are also unit tests with a fake LLM for the repair and fallback logic."
+> "The business rules live in the prompt as plain text, so changing a definition is a one-line edit. The model writes its reason before each label, which makes it more consistent. The few-shot examples are my own synthetic ones, not the six mocks, so I'm not teaching to the test. I built an eval set: the six mocks plus nine edge cases (vague, two issues in one, angry client, fake urgency, Spanish, prompt injection, spam). With the AI it gets all 15 right, with my preferred label on 44 of 45. The keyword fallback alone gets 13/15 and misses the Spanish and the API-key leak, which is exactly why the LLM is the primary engine. There are also unit tests with a fake LLM for the repair and fallback logic."
 
 ## 6:00–6:40 · Trade-offs, limitations, next steps
 
